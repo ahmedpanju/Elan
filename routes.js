@@ -1,5 +1,5 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
+const nodeMailer = require('nodemailer');
 const multer = require('multer');
 const mongoose = require('mongoose');
 const router = express.Router();
@@ -73,12 +73,28 @@ module.exports = function(app, passport) {
           });
         });
         });
+
+    app.get('/product/:id?', function(req, res) {
+      const id = req.params.id;
+      Products.findOne({ _id: id}, function (err, docs){
+        res.render('screens/collections/screens/productSingle/index.ejs', {
+          title: 'Elan - Slogan',
+          style: 'productSingle.css',
+          logic: 'productSingle.js',
+          product: docs
+        });
+      });
+    });
+
     app.get('/galleries', function(req, res) {
+      Products.find({}, function (err, docs){
       res.render('screens/galleries/index.ejs', {
         title: 'Elan - Slogan',
         style: 'galleries.css',
         logic: 'galleries.js',
+        products: docs
       });
+    });
      });
      app.get('/pricing', function(req, res) {
        res.render('screens/pricing/index.ejs', {
@@ -105,22 +121,19 @@ module.exports = function(app, passport) {
       var name = req.body.name;
       var email = req.body.email;
       var message = req.body.message;
-      nodemailer.createTestAccount((err, account) => {
-        // create reusable transporter object using the default SMTP transport
-        let transporter = nodemailer.createTransport({
-            host: 'smtp.ethereal.email',
-            port: 587,
-            secure: false, // true for 465, false for other ports
-            auth: {
-                user: account.user, // generated ethereal user
-                pass: account.pass // generated ethereal password
-            }
+
+      var transporter = nodeMailer.createTransport({
+          service: 'Gmail',
+          auth: {
+            user: 'elandecorrental@gmail.com',
+            pass: 'Gufour123!'
+          }
         });
 
         // setup email data with unicode symbols
         let mailOptions = {
             from: email, // sender address
-            to: 'bar@example.com, baz@example.com', // list of receivers
+            to: 'elandecorrental@gmail.com', // list of receivers
             subject: 'New Message', // Subject line
             text: name + message, // plain text body
             html: name + '<br>' + message // html body
@@ -128,19 +141,13 @@ module.exports = function(app, passport) {
 
         // send mail with defined transport object
         transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                return console.log(error);
-            }
-            res.redirect('/contact/success');
-            console.log('Message sent: %s', info.messageId);
-            // Preview only available when sending through an Ethereal account
-            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-            // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
-            // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
-        });
-    });
-    });
+          if (error) {
+              return console.log(error);
+          }
+          console.log('Message %s sent: %s', info.messageId, info.response);
+              res.redirect('contact/success');
+          });
+      });
 
     app.get('/admin', function(req, res) {
       res.render('screens/admin/index.ejs', {
