@@ -1,0 +1,22 @@
+<div class="container">
+  <h1 class="text-center">Shopping Cart</h1>
+  <% if (cart.length === 0) { %>
+    <h3>Your cart is empty</h3>
+  <% } else { %>
+    <% for (var i = 0; i < cart.length; i++) { %>
+        <div class="card">
+          <div class="card-header">
+          </div>
+          <div class="card-body">
+            <blockquote class="blockquote mb-0">
+              <p><%= cart[i ].name %></p>
+              <p><%= cart[i].price %></p>
+            </blockquote>
+          </div>
+      </div>
+    <% } %>
+    <form action='/checkout' method="post">
+      <button type="submit" class="btn btn-success">Checkout</button>
+    </form>
+  <% } %>
+</div>
