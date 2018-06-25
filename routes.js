@@ -33,12 +33,16 @@ module.exports = function(app, passport) {
    });
    app.get('/collections', function(req, res) {
      var user = req.user;
+     if (user.local.email === 'elandecorrental@gmail.com') {
+       res.redirect('/adminProfile');
+     } else {
      res.render('screens/collections/index.ejs', {
        title: 'Elan - Slogan',
        style: 'collections.css',
        logic: 'collections.js',
        user: user
      });
+   }
     });
     app.get('/collections/frames', function(req, res) {
       var user = req.user;
@@ -283,12 +287,32 @@ module.exports = function(app, passport) {
     });
     app.get('/adminProfile', isLoggedIn, function(req, res) {
       var user = req.user;
-      res.render('screens/admin/screens/adminProfile/index.ejs', {
-        title: 'Elan - Slogan',
-        style: 'admin.css',
-        logic: 'admin.js',
-        user: user
-      })
+      if (user.local.email === 'elandecorrental@gmail.com') {
+        Products.find({}, function(err, docs) {
+          if (err) throw err;
+          res.render('screens/admin/screens/adminProfile/index.ejs', {
+            title: 'Elan - Slogan',
+            style: 'admin.css',
+            logic: 'admin.js',
+            user: user,
+            products: docs
+          });
+        });
+      } else {
+        res.render('screens/notFound/index.ejs', {
+          title: 'Elan - Slogan',
+          style: 'notFound.css',
+          logic: 'notFound.js',
+          user: user
+        });
+      }
+    });
+
+    app.post('/removeProduct', function(req, res) {
+      Products.findByIdAndRemove(req.body.id, function (err,offer){
+          if(err) { throw err; }
+          res.redirect('/adminProfile');
+      });
     });
     app.post('/signup', passport.authenticate('local-signup', {
        successRedirect : '/collections', // redirect to the secure profile section
@@ -330,6 +354,16 @@ module.exports = function(app, passport) {
    app.get('/logout', function(req, res) {
         req.logout();
         res.redirect('/');
+    });
+
+    app.get('*', function(req, res) {
+      var user = req.user;
+      res.render('screens/notFound/index.ejs', {
+        title: 'Elan - Slogan',
+        style: 'notFound.css',
+        logic: 'notFound.js',
+        user: user
+      })
     });
 }
 
